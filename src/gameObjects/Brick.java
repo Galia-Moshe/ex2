@@ -1,6 +1,7 @@
-package gameobjects;
+package gameObjects;
 
 import BrickStrategies.CollisionStrategy;
+import bricker.main.Constants;
 import danogl.GameObject;
 import danogl.collisions.Collision;
 import danogl.gui.rendering.Renderable;
@@ -14,6 +15,8 @@ import danogl.util.Vector2;
  */
 public class Brick extends GameObject {
     private final CollisionStrategy collisionStrategy;
+    private boolean turboMode;
+    private int collisionCounter;
 
     /**
      * Construct a new GameObject instance.
@@ -28,6 +31,9 @@ public class Brick extends GameObject {
                  CollisionStrategy collisionStrategy) {
         super(topLeftCorner, dimensions, renderable);
         this.collisionStrategy = collisionStrategy;
+        this.collisionCounter = collisionCounter = 0;
+        this.turboMode = false;
+        this.setTag(Constants.BRICK_TAG);
     }
 
     /**
@@ -44,6 +50,14 @@ public class Brick extends GameObject {
     public void onCollisionEnter(GameObject other, Collision collision) {
         super.onCollisionEnter(other, collision);
         collisionStrategy.onCollision(this, other);
+        if(collisionCounter == Constants.MAX_TURBO_COLLISIONS){
+
+        }
+
+    }
+
+    public int getNumOfCollisions(){
+        return collisionCounter;
     }
 
 }

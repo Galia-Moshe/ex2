@@ -1,6 +1,9 @@
-package gameobjects;
+package gameObjects;
 
+import bricker.main.BrickerGameManager;
+import bricker.main.Constants;
 import danogl.GameObject;
+import danogl.collisions.Collision;
 import danogl.gui.UserInputListener;
 import danogl.gui.rendering.Renderable;
 import danogl.util.Vector2;
@@ -15,6 +18,9 @@ public class Paddle extends GameObject {
 //    constants
     private static final float MOVEMENT_SPEED = 300;
     private final UserInputListener inputListener;
+    private int collisionCount;
+    private final boolean isMainPaddle;
+    private final BrickerGameManager brickerGameManager;
 
     /**
      * Construct a new GameObject instance.
@@ -26,9 +32,14 @@ public class Paddle extends GameObject {
      *                      the GameObject will not be rendered.
      * @param inputListener
      */
-    public Paddle(Vector2 topLeftCorner, Vector2 dimensions, Renderable renderable, UserInputListener inputListener) {
+    public Paddle(Vector2 topLeftCorner, Vector2 dimensions, Renderable renderable, UserInputListener
+            inputListener, boolean isMainPaddle, BrickerGameManager brickerGameManager) {
         super(topLeftCorner, dimensions, renderable);
         this.inputListener = inputListener;
+        this.isMainPaddle = isMainPaddle;
+        this.brickerGameManager = brickerGameManager;
+        collisionCount = 0;
+        this.setTag(Constants.PADDLE_TAG);
     }
 
 
@@ -54,4 +65,23 @@ public class Paddle extends GameObject {
         }
         setVelocity(movementDir.mult(MOVEMENT_SPEED));
     }
+
+    @Override
+    public void onCollisionEnter(GameObject other, Collision collision) {
+        super.onCollisionEnter(other, collision);
+        if (other.getTag().equals(Constants.BALL_TAG)){
+            if (++this.collisionCount == Constants.MAX_PADDLE_COLLISION_COUNT && !isMainPaddle) {
+                this.brickerGameManager.removeObject(this);
+                this.brickerGameManager.removePaddle();
+            }
+        }
+        if (other.getTag().equals(Constants.HEART_TAG) && isMainPaddle) {
+            if (brickerGameManager.getLives() < Constants.MAX_NUM_OF_HEARTS) {
+                brickerGameManager.addLife();
+            }
+            this.brickerGameManager.removeObject(other);
+        }
+
+    }
+
 }

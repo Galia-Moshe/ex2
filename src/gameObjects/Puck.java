@@ -1,5 +1,6 @@
-package gameobjects;
+package gameObjects;
 
+import bricker.main.Constants;
 import danogl.GameObject;
 import danogl.collisions.Collision;
 import danogl.gui.Sound;
@@ -22,6 +23,7 @@ public class Puck extends Ball{
     public Puck(Vector2 topLeftCorner, Vector2 dimensions, Renderable renderable, Sound collisionSound) {
         super(topLeftCorner, dimensions, renderable, collisionSound);
         collisionCounter = 0;
+        this.setTag(Constants.PUCK_TAG);
     }
 
     @Override
