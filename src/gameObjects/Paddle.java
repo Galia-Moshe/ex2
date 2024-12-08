@@ -5,6 +5,7 @@ import bricker.main.Constants;
 import danogl.GameObject;
 import danogl.collisions.Collision;
 import danogl.gui.UserInputListener;
+import danogl.gui.WindowController;
 import danogl.gui.rendering.Renderable;
 import danogl.util.Vector2;
 import java.awt.event.KeyEvent;
@@ -16,11 +17,12 @@ import java.awt.event.KeyEvent;
  */
 public class Paddle extends GameObject {
 //    constants
-    private static final float MOVEMENT_SPEED = 300;
     private final UserInputListener inputListener;
     private int collisionCount;
     private final boolean isMainPaddle;
     private final BrickerGameManager brickerGameManager;
+    private final WindowController windowController;
+
 
     /**
      * Construct a new GameObject instance.
@@ -33,11 +35,13 @@ public class Paddle extends GameObject {
      * @param inputListener
      */
     public Paddle(Vector2 topLeftCorner, Vector2 dimensions, Renderable renderable, UserInputListener
-            inputListener, boolean isMainPaddle, BrickerGameManager brickerGameManager) {
+            inputListener, boolean isMainPaddle, BrickerGameManager brickerGameManager, WindowController
+            windowController) {
         super(topLeftCorner, dimensions, renderable);
         this.inputListener = inputListener;
         this.isMainPaddle = isMainPaddle;
         this.brickerGameManager = brickerGameManager;
+        this.windowController = windowController;
         collisionCount = 0;
         this.setTag(Constants.PADDLE_TAG);
     }
@@ -56,14 +60,17 @@ public class Paddle extends GameObject {
     @Override
     public void update(float deltaTime) {
         super.update(deltaTime);
-        Vector2 movementDir = Vector2.ZERO;
-        if (inputListener.isKeyPressed(KeyEvent.VK_LEFT)) {
-            movementDir = movementDir.add((Vector2.LEFT));
+        float winLeftEdge = 0;
+
+        Vector2 moveDir = Vector2.ZERO;
+        if (inputListener.isKeyPressed(KeyEvent.VK_LEFT) && getTopLeftCorner().x() > winLeftEdge) {
+            moveDir = moveDir.add(Vector2.LEFT.mult(Constants.PADDLE_MOVEMENT_SPEED));
+        } else if (inputListener.isKeyPressed(KeyEvent.VK_RIGHT) && ( getTopLeftCorner().x() +
+                Constants.PADDLE_WIDTH) < windowController.getWindowDimensions().x()) {
+            moveDir = moveDir.add(Vector2.RIGHT.mult(Constants.PADDLE_MOVEMENT_SPEED));
         }
-        if (inputListener.isKeyPressed(KeyEvent.VK_RIGHT)) {
-            movementDir = movementDir.add((Vector2.RIGHT));
-        }
-        setVelocity(movementDir.mult(MOVEMENT_SPEED));
+        setVelocity(moveDir);
+
     }
 
     @Override
@@ -77,7 +84,7 @@ public class Paddle extends GameObject {
         }
         if (other.getTag().equals(Constants.HEART_TAG) && isMainPaddle) {
             if (brickerGameManager.getLives() < Constants.MAX_NUM_OF_HEARTS) {
-                brickerGameManager.addLife();
+                brickerGameManager.addLife((Heart) other);
             }
             this.brickerGameManager.removeObject(other);
         }

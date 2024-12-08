@@ -55,9 +55,4 @@ public class Brick extends GameObject {
         }
 
     }
-
-    public int getNumOfCollisions(){
-        return collisionCounter;
-    }
-
 }

@@ -40,8 +40,6 @@ public class Ball  extends GameObject {
     @Override
     public void onCollisionEnter(GameObject other, Collision collision) {
         collisionCounter++;
-        System.out.println(collisionCounter);
-        System.out.println(coulisionCountTOCancelTurbo);
         super.onCollisionEnter(other, collision);
         Vector2 newVel = getVelocity().flipped(collision.getNormal());
         setVelocity(newVel);
@@ -52,17 +50,12 @@ public class Ball  extends GameObject {
     }
 
     public void exitTurboState(ImageReader imageReader){
-        System.out.println("enter");
         turboState = false;
-        Renderable redBallImage = imageReader.readImage(Constants.ASSETS_BALL_PNG, true);
+        Renderable redBallImage = imageReader.readImage(Constants.ASSETS_BALL_PNG,
+                true);
         this.renderer().setRenderable(redBallImage);
         float ballVelX = Constants.BALL_SPEED;
         float ballVelY = Constants.BALL_SPEED;
-//        Random rand  = new Random();
-//        if (rand.nextBoolean())
-//        {
-//            ballVelX *= -1;
-//        }
 
         this.setVelocity(new Vector2(ballVelX, ballVelY));
 
@@ -75,15 +68,11 @@ public class Ball  extends GameObject {
         }
         turboState = true;
         coulisionCountTOCancelTurbo = collisionCounter + Constants.MAX_TURBO_COLLISIONS;
-        Renderable redBallImage = imageReader.readImage(Constants.ASSETS_RED_BALL_PNG, true);
+        Renderable redBallImage = imageReader.readImage(Constants.ASSETS_RED_BALL_PNG,
+                true);
         this.renderer().setRenderable(redBallImage);
         float ballVelX = Constants.TURBO_SPEED_FACTOR * Constants.BALL_SPEED;
         float ballVelY = Constants.TURBO_SPEED_FACTOR * Constants.BALL_SPEED;
-        Random rand  = new Random();
-//        if (rand.nextBoolean())
-//        {
-//            ballVelX *= -1;
-//        }
         this.setVelocity(new Vector2(ballVelX, ballVelY));
 
     }

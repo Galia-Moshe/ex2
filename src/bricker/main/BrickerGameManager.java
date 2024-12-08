@@ -38,7 +38,8 @@ public class BrickerGameManager extends GameManager {
     private TextRenderable livesTextRenderable;
     private int BricksInRowNum;
     private int BricksRowNum;
-
+    private Bricks[] bricksTypes = {Bricks.ADD_PADDLE,Bricks.ADD_LIFE,
+            Bricks.ADD_PUCKS,Bricks.TURBO,Bricks.DOUBLE_BEHAVIOUR};
 
     /**
      * constructor for the game manager.
@@ -116,16 +117,18 @@ public class BrickerGameManager extends GameManager {
         Renderable brickImage = imageReader.readImage(Constants.ASSETS_BRICK_PNG, true);
         numOfBricks = BricksRowNum * BricksInRowNum;
         float brickWidth =
-                ((Constants.WINDOW_SIZE.x() - Constants.BIAS_FOR_BRICKS)  - ((BricksInRowNum + 1) * Constants.BIAS_FOR_SIDES))
-                        / BricksInRowNum;
+                ((Constants.WINDOW_SIZE.x() - Constants.BIAS_FOR_BRICKS)  - ((BricksInRowNum + 1) *
+                        Constants.BIAS_FOR_SIDES)) / BricksInRowNum;
         Vector2 brickDimensions = Vector2.of(brickWidth, Constants.BRICK_HEIGHT);
         int brickHeigthFactor = Constants.BIAS_FOR_BRICKS_HEIGHT;
         for (int row = 0; row < BricksRowNum; row++){
             float brickWidthFactor =Constants.BIAS_FOR_BRICK_WIDTH;
             for (int col = 0; col < BricksInRowNum; col++){
                 Vector2 brickCoords = Vector2.of(brickWidthFactor, brickHeigthFactor);
+                Bricks curBrick = getBrickType();
                 CollisionStrategy collisionStrategy = brickFactory.buildCollisionStrategy(
-                        this, imageReader, soundReader, windowController, brickCoords, inputListener);
+                        this, curBrick, imageReader, soundReader, brickCoords, inputListener,
+                        true, windowController);
                 GameObject brick = new Brick(brickCoords, brickDimensions, brickImage, collisionStrategy);
                 gameObjects().addGameObject(brick);
                 brick.setTag(Constants.BRICK_TAG);
@@ -135,6 +138,14 @@ public class BrickerGameManager extends GameManager {
         }
     }
 
+    private Bricks getBrickType() {
+        boolean isBasic = rand.nextBoolean();
+        int index = rand.nextInt(bricksTypes.length);
+        if (isBasic) {
+            return Bricks.BASIC;
+        }
+        return bricksTypes[index];
+    }
 
     public void removeObject(GameObject object){
         boolean objectRemoved =
@@ -152,54 +163,61 @@ public class BrickerGameManager extends GameManager {
     private void createNumericLivesDisplay() {
         livesTextRenderable = new TextRenderable(Integer.toString(lifeLeft));
         livesTextRenderable.setColor(Color.GREEN);
-        Vector2 textPosition = new Vector2(10, 40);
-        livesTextObject = new GameObject(textPosition, new Vector2(20,20), livesTextRenderable);
+        Vector2 textPosition = new Vector2(Constants.LIVE_DISPLAY_X, Constants.LIVE_DISPLAY_Y);
+        livesTextObject = new GameObject(textPosition, new Vector2(Constants.TEXT_POSITION_X,
+                Constants.TEXT_POSITION_Y), livesTextRenderable);
         gameObjects().addGameObject(livesTextObject, Layer.UI);
     }
 
 
 
     private void createHearts(ImageReader imageReader) {
-        Renderable heartRender = imageReader.readImage(Constants.ASSETS_HEART_PNG, true);
+        Renderable heartRender= imageReader.readImage(Constants.ASSETS_HEART_PNG, true);
         heartObjects = new ArrayList<>();
-        int spacing = 15; // Space between hearts
-        for (int i = 0; i < Constants.NUM_OF_HEARTS; i++) {
-            Vector2 heartPosition = new Vector2(spacing * i + 10, 10);
+        for (int i = 0; i < Constants.MAX_NUM_OF_HEARTS; i++) {
+            Vector2 heartPosition = new Vector2(Constants.SPACING * i + Constants.BIAS_FOR_HEARTS,
+                    Constants.BIAS_FOR_HEARTS);
             Vector2 heartSize = new Vector2(Constants.HEART_SIZE , Constants.HEART_SIZE);
-            Heart heart = new Heart(heartPosition, heartSize, heartRender);
+            Heart heart = new Heart(heartPosition, heartSize, heartRender, this);
             heartObjects.add(heart);
-            gameObjects().addGameObject(heart, Layer.UI);
+            if (i < Constants.NUM_OF_HEARTS) {
+                gameObjects().addGameObject(heartObjects.get(i), Layer.UI);
+            }
+
         }
+
     }
 
-    private void updateHearts(int livesLeft) {
+    private void updateHearts(boolean addLife) {
+        if (!addLife) {
+            gameObjects().removeGameObject(heartObjects.get(lifeLeft - 1), Layer.UI);
+            lifeLeft--;
 
-        while (heartObjects.size() > livesLeft) {
-            Heart heart = heartObjects.remove(heartObjects.size() - 1);
-            gameObjects().removeGameObject(heart, Layer.UI);
+        }
+        if(addLife && lifeLeft < Constants.MAX_NUM_OF_HEARTS){
+            gameObjects().addGameObject(this.heartObjects.get(lifeLeft++), Layer.UI);
         }
     }
 
 
 
     private void createPaddles(ImageReader imageReader, UserInputListener inputListener, Ball ball) {
-        Renderable paddleImage = imageReader.readImage(Constants.ASSETS_PADDLE_PNG, true);
-
+        int seperatHalf = 2;
+        Renderable paddleImage = imageReader.readImage(Constants.ASSETS_PADDLE_PNG,
+                true);
         //create user paddle
-        GameObject userPaddle = new Paddle(Vector2.ZERO, new Vector2(Constants.PADDLE_WIDTH, Constants.PADDLE_LENGTH), paddleImage,
-                inputListener, true, this);
-        userPaddle.setCenter(new Vector2(WindowDimensions.x()/2, WindowDimensions.y() - 30));
+        GameObject userPaddle = new Paddle(Vector2.ZERO, new Vector2(Constants.PADDLE_WIDTH,
+                Constants.PADDLE_LENGTH), paddleImage, inputListener, true, this,
+                windowController);
+        userPaddle.setCenter(new Vector2(WindowDimensions.x()/ seperatHalf, WindowDimensions.y() -
+                Constants.PART_OF_WINDOW));
         gameObjects().addGameObject(userPaddle);
 
-
-        //create AI paddle
-//        GameObject AiPaddle = new AIPaddle(Vector2.ZERO, new Vector2(200, 20), paddleImage, ball);
-//        AiPaddle.setCenter(new Vector2(WindowDimensions.x()/2, 30));
-//        gameObjects().addGameObject(AiPaddle);
     }
 
     private void createBackGround(ImageReader imageReader) {
-        Renderable backgroundRender = imageReader.readImage(Constants.ASSETS_DARK_BG_2_SMALL_JPEG, true);
+        Renderable backgroundRender = imageReader.readImage(Constants.ASSETS_DARK_BG_2_SMALL_JPEG,
+                true);
         GameObject background = new GameObject(Vector2.ZERO, new Vector2(WindowDimensions.x(),
                 WindowDimensions.y()),  backgroundRender);
         background.setCoordinateSpace(CoordinateSpace.CAMERA_COORDINATES);
@@ -207,15 +225,20 @@ public class BrickerGameManager extends GameManager {
     }
 
     private void createWalls() {
+        int rightWallY = 0;
+        int downWalllX = 0;
         Renderable wallRender = new RectangleRenderable(Constants.BORDER_COLOR);
         GameObject leftWall = new GameObject(Vector2.ZERO, new Vector2(Constants.BIAS_FOR_WALLS,
                 WindowDimensions.y()),
                 wallRender);
-        GameObject rightWall = new GameObject(new Vector2(WindowDimensions.x() - Constants.BIAS_FOR_WALLS, 0),
-                new Vector2(Constants.BIAS_FOR_WALLS,
-                WindowDimensions.y()), wallRender);
-        GameObject upperWall = new GameObject(Vector2.ZERO, new Vector2(WindowDimensions.x(), Constants.BIAS_FOR_WALLS),
+        GameObject rightWall = new GameObject(new Vector2(WindowDimensions.x() - Constants.BIAS_FOR_WALLS,
+                rightWallY), new Vector2(Constants.BIAS_FOR_WALLS, WindowDimensions.y()), wallRender);
+        GameObject upperWall = new GameObject(Vector2.ZERO, new Vector2(WindowDimensions.x(),
+                Constants.BIAS_FOR_WALLS),
                 wallRender);
+        GameObject downWall = new GameObject(new Vector2(downWalllX, getWinDimentions().y()),
+                new Vector2(getWinDimentions().x(), Constants.WALL_WIDTH), null);
+        downWall.setTag(Constants.BOTTOM_WALL_TAG);
         gameObjects().addGameObject(leftWall);
         gameObjects().addGameObject(rightWall);
         gameObjects().addGameObject(upperWall);
@@ -225,7 +248,8 @@ public class BrickerGameManager extends GameManager {
                          WindowController windowController) {
         Renderable ballImage =  imageReader.readImage(Constants.ASSETS_BALL_PNG, true);
         Sound collisionSound = soundReader.readSound(Constants.ASSETS_BLOP_WAV);
-        ball = new Ball(Vector2.ZERO, new Vector2(Constants.BALL_WIDTH,Constants.BALL_LENGTH), ballImage, collisionSound);
+        ball = new Ball(Vector2.ZERO, new Vector2(Constants.BALL_WIDTH,Constants.BALL_LENGTH), ballImage,
+                collisionSound);
         float ballVelX = Constants.BALL_SPEED;
         float ballVelY = Constants.BALL_SPEED;
         rand  = new Random();
@@ -241,7 +265,7 @@ public class BrickerGameManager extends GameManager {
         }
         ball.setVelocity(new Vector2(ballVelX, ballVelY));
         WindowDimensions = windowController.getWindowDimensions();
-        ball.setCenter(WindowDimensions.mult(0.5F));
+        ball.setCenter(WindowDimensions.mult(Constants.BALL_CENTER_FACTOR));
         gameObjects().addGameObject(ball);
     }
 
@@ -266,6 +290,7 @@ public class BrickerGameManager extends GameManager {
     public void update(float deltaTime) {
         super.update(deltaTime);
         CheckForGameEnd();
+
     }
 
     private void CheckForGameEnd() {
@@ -287,15 +312,17 @@ public class BrickerGameManager extends GameManager {
                 break;
         }
         String prompt = "";
-        if (ballHeight > WindowDimensions.y())
-        {
-            updateGameStatus();
-        }
         if (numOfBricks == 0)
         {
             prompt = Constants.YOU_WIN;
             finishGame(prompt);
         }
+
+        if (ballHeight > WindowDimensions.y())
+        {
+            updateGameStatus();
+        }
+
         else if(lifeLeft == 0)
         {
             prompt = Constants.YOU_LOSE;
@@ -317,9 +344,8 @@ public class BrickerGameManager extends GameManager {
     }
 
     private void updateGameStatus() {
-        lifeLeft--;
-        updateHearts(lifeLeft);
-        ball.setCenter(WindowDimensions.mult(0.5F));
+        updateHearts(false);
+        ball.setCenter(WindowDimensions.mult(Constants.BALL_CENTER_FACTOR));
         float ballVelX = Constants.BALL_SPEED;
         float ballVelY = Constants.BALL_SPEED;
         if (rand.nextBoolean())
@@ -346,8 +372,9 @@ public class BrickerGameManager extends GameManager {
     /**
      * Adds a life to the player.
      */
-    public void addLife() {
-        this.lifeLeft++;
+    public void addLife(Heart heart) {
+        updateHearts(true);
+
     }
 
     /**
@@ -360,7 +387,8 @@ public class BrickerGameManager extends GameManager {
 
     public static void main(String[] args) {
         ArgsFactory result = getArgsFactory(args);
-        new BrickerGameManager(Constants.BOUNCING_BALL, new Vector2(700, 500), result.BricksInRowNum(), result.BricksRowNum()).run();
+        new BrickerGameManager(Constants.BOUNCING_BALL, new Vector2(Constants.WINDOW_DIM_X,
+                Constants.WINDOW_DIM_Y), result.BricksInRowNum(), result.BricksRowNum()).run();
     }
 
     private static ArgsFactory getArgsFactory(String[] args) {

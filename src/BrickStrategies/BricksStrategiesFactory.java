@@ -1,6 +1,7 @@
 package BrickStrategies;
 
 import bricker.main.BrickerGameManager;
+import bricker.main.Bricks;
 import bricker.main.Constants;
 import danogl.gui.ImageReader;
 import danogl.gui.SoundReader;
@@ -18,31 +19,34 @@ public class BricksStrategiesFactory {
         // Constructor intentionally empty
     }
 
-    public CollisionStrategy buildCollisionStrategy(BrickerGameManager brickerGameManager,ImageReader
-            imageReader, SoundReader soundReader, WindowController windowController, Vector2 brickCoords,
-                                                    UserInputListener inputListener){
+    public CollisionStrategy buildCollisionStrategy(BrickerGameManager brickerGameManager, Bricks brick,
+                                                    ImageReader imageReader, SoundReader soundReader,
+                                                    Vector2 brickCoords, UserInputListener inputListener,
+                                                    boolean isRandomDoubleBehaviour,
+                                                    WindowController windowController){
         CollisionStrategy collisionStrategy = null;
-        Random random = new Random();
-        int probability = random.nextInt(10);
-        switch(probability){
-            case Constants.ADD_BALLS_PROBABILITY:
+
+        switch(brick){
+            case ADD_PUCKS:
                 collisionStrategy = new AddPucksStrategy(brickerGameManager,imageReader, soundReader,
                         brickCoords);
                 break;
-            case Constants.ADD_PADDLE_PROBABILITY:
-                collisionStrategy = new AddPaddleStrategy(brickerGameManager, imageReader, inputListener);
+            case ADD_PADDLE:
+                collisionStrategy = new AddPaddleStrategy(brickerGameManager, imageReader, inputListener,
+                        windowController);
                 break;
-            case Constants.TURBO_STATE_PROBABILITY:
+            case TURBO:
                 collisionStrategy = new TurboStateStrategy(brickerGameManager, imageReader);
                 break;
-            case Constants.ADD_HEART_PROBABILITY:
+            case ADD_LIFE:
                 collisionStrategy = new AddLifeStrategy(brickerGameManager, imageReader, brickCoords);
                 break;
-//            case Constants.DOUBLE_BEHAVE_PROBABILITY:
-//                collisionStrategy = new DoubleBehaviorStrategy(brickerGameManager);
-//                break;
+            case DOUBLE_BEHAVIOUR:
+                collisionStrategy = new DoubleBehaviorStrategy(imageReader,brickerGameManager, soundReader,
+                        brickCoords, inputListener, windowController, isRandomDoubleBehaviour);
+                break;
             default:
-                collisionStrategy = new AddLifeStrategy(brickerGameManager, imageReader, brickCoords);
+                collisionStrategy = new BasicCollisionStrategy(brickerGameManager);
         }
         return collisionStrategy;
     }

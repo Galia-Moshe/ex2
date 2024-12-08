@@ -6,7 +6,9 @@ import java.awt.*;
 
 
 public class Constants {
-    public static final float BALL_SPEED = 150;
+    public static final float BALL_SPEED = 100;
+    public static final float WINDOW_DIM_X = 700;
+    public static final float WINDOW_DIM_Y = 500;
     public static final Color BORDER_COLOR = Color.BLUE;
     public static final int NUM_OF_HEARTS = 3;
     public static final int MAX_NUM_OF_HEARTS = 4;
@@ -28,6 +30,7 @@ public class Constants {
     public static final Vector2 WINDOW_SIZE = Vector2.of(700, 500);
     public static final int BRIX_IDX = 0;
     public static final int ROWS_IDX = 1;
+    public static final float PADDLE_MOVEMENT_SPEED = 300;
     public static final int DEFAULT_BRICKS_IN_ROW = 8;
     public static final int DEFAULT_BRICKS_ROW = 7;
     public static final int ARGS = 2;
@@ -42,21 +45,26 @@ public class Constants {
     public static final int BIAS_FOR_WALLS = 5;
     public static final float BALL_WIDTH = 20;
     public static final float BALL_LENGTH = 20;
-    public static final float PADDLE_WIDTH = 200;
-    public static final float PADDLE_LENGTH = 20;
+    public static final float PADDLE_WIDTH = 100;
+    public static final float PADDLE_LENGTH = 15;
     public static final float PUCKS_PRESENTS_SIZE = 0.75F;
     public static final float TURBO_SPEED_FACTOR = 1.4F;
     public static final String PUCK_TAG = "Puck";
     public static final int MAX_TURBO_COLLISIONS = 6;
+    public static final int PART_OF_WINDOW = 30;
+    public static final int LIVE_DISPLAY_X = 10;
+    public static final int LIVE_DISPLAY_Y = 40;
+    public static final int TEXT_POSITION_X = 20;
+    public static final int TEXT_POSITION_Y = 20;
+    public static final int SPACING = 15;
+    public static final int BIAS_FOR_HEARTS = 10;
+    public static final float BALL_CENTER_FACTOR = 0.5F;
 
-    public static final int ADD_BALLS_PROBABILITY = 0;
-    public static final int ADD_PADDLE_PROBABILITY = 1;
-    public static final int TURBO_STATE_PROBABILITY = 2;
-    public static final int ADD_HEART_PROBABILITY = 3;
-    public static final int DOUBLE_BEHAVE_PROBABILITY = 4;
 
     public static final int MAX_PADDLE_COLLISION_COUNT = 4;
     public static final int MAXIMUM_PADDLE_COUNT = 2;
 
     public static final float HEART_SPEED = 100;
+    public static final String BOTTOM_WALL_TAG = "Floor";
+    public static final float WALL_WIDTH = 10;
 }

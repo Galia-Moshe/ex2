@@ -39,9 +39,11 @@ public class AddPucksStrategy extends BasicCollisionStrategy implements Collisio
     }
 
     private Puck createPuckBall(){
-        Renderable puckBallImage =  imageReader.readImage(Constants.ASSETS_PUCK_PNG, true);
+        Renderable puckBallImage =  imageReader.readImage(Constants.ASSETS_PUCK_PNG,
+                true);
         Sound collisionSound = soundReader.readSound(Constants.ASSETS_BLOP_WAV);
-        Puck packBall = new Puck(brickCoords, new Vector2(Constants.PUCKS_PRESENTS_SIZE * Constants.BALL_WIDTH,
+        Puck packBall = new Puck(brickCoords, new Vector2(Constants.PUCKS_PRESENTS_SIZE *
+                Constants.BALL_WIDTH,
                 Constants.PUCKS_PRESENTS_SIZE* Constants.BALL_LENGTH), puckBallImage, collisionSound);
 
         Random puckRand  = new Random();
